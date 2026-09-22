@@ -15,7 +15,8 @@ defmodule GameUQ do
     menu([])
   end
 
-  # Menu principal
+  # El estado de la aplicacion se mantiene en la lista de videojuegos.
+  # Cada opcion puede devolver una nueva lista, debido a la inmutabilidad de Elixir.
 
   defp menu(videojuegos) do
     IO.puts("
@@ -98,6 +99,7 @@ defmodule GameUQ do
     plataforma = Util.ingresar("Plataforma: ", :texto)
     precio = Util.ingresar("Precio: ", :entero)
 
+    # El mapa representa un videojuego 
     videojuego = %{
       id: id,
       nombre: nombre,
@@ -106,6 +108,7 @@ defmodule GameUQ do
       precio: precio
     }
 
+    # El operador | agrega el nuevo elemento al inicio de la lista.
     nueva_lista = [videojuego | videojuegos]
 
     IO.puts("\nVideojuego agregado correctamente.")
@@ -130,7 +133,9 @@ defmodule GameUQ do
   defp mostrar_videojuegos(videojuegos) do
     mensaje =
       videojuegos
+      # sort_by permite ordenar la lista utilizando el ID de cada mapa.
       |> Enum.sort_by(& &1.id)
+      # map transforma cada videojuego en un texto para mostrarlo.
       |> Enum.map(fn videojuego ->
         "
         +--------------------------------------+
@@ -142,6 +147,7 @@ defmodule GameUQ do
         +--------------------------------------+
         "
       end)
+      # join une todos los textos en una sola cadena.
       |> Enum.join("\n")
 
     IO.puts("
@@ -154,82 +160,86 @@ defmodule GameUQ do
     ")
   end
 
-  # Buscar videojuego
 
-  defp buscar_videojuego(videojuegos) do
-    IO.puts("
+# Buscar videojuego
 
-    +--------------------------------------+
-    |          BUSCAR VIDEOJUEGO           |
-    +--------------------------------------+
-    ")
+defp buscar_videojuego(videojuegos) do
+  IO.puts("
 
-    id = Util.ingresar("Ingrese el ID: ", :entero)
+  +--------------------------------------+
+  |          BUSCAR VIDEOJUEGO           |
+  +--------------------------------------+
+  ")
 
-    resultado =
-      videojuegos
-      |> Enum.find(fn videojuego ->
-        videojuego.id == id
-      end)
+  id = Util.ingresar("Ingrese el ID: ", :entero)
 
+  # Enum.find busca el primer elemento que cumpla la condicion.
+  # Si no encuentra ninguno, devuelve nil.
+  resultado =
+    videojuegos
+    |> Enum.find(fn videojuego ->
+      videojuego.id == id
+    end)
+
+  # La tupla permite representar dos posibles resultados de la busqueda:
+  # {:error, mensaje} cuando no existe y {:ok, videojuego} cuando existe.
+  resultado_busqueda =
     case resultado do
       nil ->
-        resultado_busqueda = {:error, "Videojuego no encontrado"}
-
-        case resultado_busqueda do
-          {:error, mensaje} ->
-            IO.puts("\nError: #{mensaje}.\n")
-        end
+        {:error, "Videojuego no encontrado"}
 
       videojuego ->
-        resultado_busqueda = {:ok, videojuego}
-
-        case resultado_busqueda do
-          {:ok, videojuego} ->
-            IO.puts("
-
-            +--------------------------------------+
-            |          VIDEOJUEGO ENCONTRADO       |
-            +--------------------------------------+
-            | ID:         #{videojuego.id}
-            | Nombre:     #{videojuego.nombre}
-            | Genero:     #{videojuego.genero}
-            | Plataforma: #{videojuego.plataforma}
-            | Precio:     $#{videojuego.precio}
-            +--------------------------------------+
-            ")
-        end
+        {:ok, videojuego}
     end
+
+  # case realiza pattern matching sobre la tupla para identificar
+  # si la operacion termino correctamente o produjo un error.
+  case resultado_busqueda do
+    {:error, mensaje} ->
+      IO.puts("\nError: #{mensaje}.\n")
+
+    {:ok, videojuego} ->
+      IO.puts("
+
+      +--------------------------------------+
+      |          VIDEOJUEGO ENCONTRADO       |
+      +--------------------------------------+
+      | ID:         #{videojuego.id}         |
+      | Nombre:     #{videojuego.nombre}     |
+      | Genero:     #{videojuego.genero}     |
+      | Plataforma: #{videojuego.plataforma} |
+      | Precio:     $#{videojuego.precio}    |
+      +--------------------------------------+
+      ")
   end
+end
 
-  # Actualizar videojuego
 
-  defp actualizar_videojuego(videojuegos) do
-    IO.puts("
 
-    +--------------------------------------+
-    |         ACTUALIZAR VIDEOJUEGO        |
-    +--------------------------------------+
-    ")
 
-    id = Util.ingresar("Ingrese el ID: ", :entero)
+# Actualizar videojuego
 
-    resultado =
-      videojuegos
-      |> Enum.find(fn videojuego ->
-        videojuego.id == id
-      end)
+defp actualizar_videojuego(videojuegos) do
+  IO.puts("
 
+  +--------------------------------------+
+  |         ACTUALIZAR VIDEOJUEGO        |
+  +--------------------------------------+
+  ")
+
+  id = Util.ingresar("Ingrese el ID: ", :entero)
+
+  # Primero se busca el videojuego para comprobar que exista.
+  resultado =
+    videojuegos
+    |> Enum.find(fn videojuego ->
+      videojuego.id == id
+    end)
+
+  resultado_actualizacion =
     case resultado do
       nil ->
-        resultado_actualizacion = {:error, "Videojuego no encontrado"}
-
-        case resultado_actualizacion do
-          {:error, mensaje} ->
-            IO.puts("\nError: #{mensaje}.\n")
-        end
-
-        videojuegos
+        {:error, "Videojuego no encontrado"}
 
       videojuego ->
         nombre = Util.ingresar("Nuevo nombre: ", :texto)
@@ -237,6 +247,8 @@ defmodule GameUQ do
         plataforma = Util.ingresar("Nueva plataforma: ", :texto)
         precio = Util.ingresar("Nuevo precio: ", :entero)
 
+        # Los mapas son inmutables. Esta sintaxis crea un nuevo mapa
+        # conservando los campos que no se modifican.
         videojuego_actualizado = %{
           videojuego
           | nombre: nombre,
@@ -245,6 +257,8 @@ defmodule GameUQ do
             precio: precio
         }
 
+        # map recorre la lista y construye una nueva lista.
+        # Solo reemplaza el elemento cuyo ID coincide.
         nueva_lista =
           videojuegos
           |> Enum.map(fn elemento ->
@@ -255,67 +269,79 @@ defmodule GameUQ do
             end
           end)
 
-        resultado_actualizacion = {:ok, videojuego_actualizado}
-
-        case resultado_actualizacion do
-          {:ok, _videojuego} ->
-            IO.puts("\nVideojuego actualizado correctamente.\n")
-        end
-
-        nueva_lista
+        {:ok, nueva_lista}
     end
-  end
 
-  # Eliminar videojuego
-
-  defp eliminar_videojuego(videojuegos) do
-    IO.puts("
-
-    +--------------------------------------+
-    |          ELIMINAR VIDEOJUEGO         |
-    +--------------------------------------+
-    ")
-
-    id = Util.ingresar("Ingrese el ID: ", :entero)
-
-    resultado =
+  # En caso de error se conserva la lista original.
+  # En caso de exito se devuelve la nueva lista actualizada.
+  case resultado_actualizacion do
+    {:error, mensaje} ->
+      IO.puts("\nError: #{mensaje}.\n")
       videojuegos
-      |> Enum.find(fn videojuego ->
-        videojuego.id == id
-      end)
 
+    {:ok, nueva_lista} ->
+      IO.puts("\nVideojuego actualizado correctamente.\n")
+      nueva_lista
+  end
+end
+
+
+
+
+# Eliminar videojuego
+
+defp eliminar_videojuego(videojuegos) do
+  IO.puts("
+
+  +--------------------------------------+
+  |          ELIMINAR VIDEOJUEGO         |
+  +--------------------------------------+
+  ")
+
+  id = Util.ingresar("Ingrese el ID: ", :entero)
+
+  # find permite comprobar primero si existe el videojuego.
+  resultado =
+    videojuegos
+    |> Enum.find(fn videojuego ->
+      videojuego.id == id
+    end)
+
+  resultado_eliminacion =
     case resultado do
       nil ->
-        resultado_eliminacion = {:error, "Videojuego no encontrado"}
-
-        case resultado_eliminacion do
-          {:error, mensaje} ->
-            IO.puts("\nError: #{mensaje}.\n")
-        end
-
-        videojuegos
+        {:error, "Videojuego no encontrado"}
 
       videojuego ->
+        # reject crea una nueva lista excluyendo el elemento indicado.
         nueva_lista =
           videojuegos
           |> Enum.reject(fn elemento ->
             elemento.id == id
           end)
 
-        resultado_eliminacion = {:ok, videojuego}
-
-        case resultado_eliminacion do
-          {:ok, videojuego} ->
-            IO.puts("
-
-            Videojuego eliminado correctamente.
-            Videojuego eliminado: #{videojuego.nombre}
-            ")
-        end
-
-        nueva_lista
+        # La tupla contiene la nueva lista y el videojuego eliminado,
+        # porque ambos datos son necesarios despues de la eliminacion.
+        {:ok, nueva_lista, videojuego}
     end
+
+  case resultado_eliminacion do
+    {:error, mensaje} ->
+      IO.puts("\nError: #{mensaje}.\n")
+      videojuegos
+
+    {:ok, nueva_lista, videojuego} ->
+      IO.puts("
+
+      Videojuego eliminado correctamente.
+      Videojuego eliminado: #{videojuego.nombre}
+      ")
+
+      nueva_lista
   end
+end
+
+
 
   # Estadisticas
 
@@ -331,14 +357,19 @@ defmodule GameUQ do
   end
 
   defp mostrar_estadisticas(videojuegos) do
+    # count obtiene la cantidad de elementos de la lista.
     cantidad = Enum.count(videojuegos)
 
+    # reduce recorre todos los videojuegos y acumula sus precios
+    # comenzando desde cero.
     valor_total =
       videojuegos
       |> Enum.reduce(0, fn videojuego, acumulador ->
         videojuego.precio + acumulador
       end)
 
+    # filter conserva solamente los videojuegos cuya plataforma es PC.
+    # downcase permite comparar sin importar mayusculas o minusculas.
     videojuegos_pc =
       videojuegos
       |> Enum.filter(fn videojuego ->
@@ -346,10 +377,12 @@ defmodule GameUQ do
       end)
       |> Enum.count()
 
+    # Se ordena de mayor a menor para obtener el videojuego mas costoso.
     videojuegos_ordenados =
       videojuegos
       |> Enum.sort_by(& &1.precio, :desc)
 
+    # hd obtiene el primer elemento de la lista ordenada.
     mas_costoso = hd(videojuegos_ordenados)
 
     IO.puts("
@@ -358,14 +391,14 @@ defmodule GameUQ do
     |          ESTADISTICAS GAMEUQ                |
     +---------------------------------------------+
     |                                             |
-    | Videojuegos registrados: #{cantidad}
+    | Videojuegos registrados: #{cantidad}        |
     |                                             |
-    | Valor total:             $#{valor_total}
+    | Valor total:             $#{valor_total}    |
     |                                             |
-    | Videojuegos para PC:     #{videojuegos_pc}
+    | Videojuegos para PC:     #{videojuegos_pc}  |
     |                                             |
-    | Mas costoso: #{mas_costoso.nombre}
-    | Precio:      $#{mas_costoso.precio}
+    | Mas costoso: #{mas_costoso.nombre}          |
+    | Precio:      $#{mas_costoso.precio}         |
     |                                             |
     +---------------------------------------------+
     ")
@@ -378,6 +411,8 @@ defmodule GameUQ do
   end
 
   defp obtener_nuevo_id(videojuegos) do
+    # Se extraen los ID, se obtiene el mayor y se suma uno
+    # para generar el siguiente identificador.
     videojuegos
     |> Enum.map(fn videojuego ->
       videojuego.id
