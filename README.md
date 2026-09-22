@@ -1,3 +1,9 @@
+##Autores
+-Juan Camilo Agudelo
+-Jeronimo Delgado
+-Jose Carmona
+-Sara Villegas
+
 # GameUQ
 
 Aplicación de consola desarrollada en Elixir para la gestión de videojuegos.
