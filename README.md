@@ -1,4 +1,4 @@
-##Autores
+Autores
 -Juan Camilo Agudelo
 -Jeronimo Delgado
 -Jose Carmona
